@@ -12,22 +12,22 @@ function getStartUpCode(language) {
   language = language.toLowerCase();
 
   if (language === "javascript") {
-    return `console.log('Hello, World!');`
+    return `console.log('Hello, World!');`;
   } else if (language === "python") {
-    return `print('Hello, World!')`
+    return `print('Hello, World!')`;
   } else if (language === "java") {
     return `public class Main {
     public static void main(String[] args) {
         System.out.println("Hello, World!");
     }
-}`
+}`;
   } else if (language === "c") {
     return `#include <stdio.h>
 
 int main() {
     printf("Hello, World!\\n");
     return 0;
-}`
+}`;
   } else if (language === "c++") {
     return `#include <iostream>
 using namespace std;
@@ -35,20 +35,20 @@ using namespace std;
 int main() {
     cout << "Hello, World!" << endl;
     return 0;
-}`
+}`;
   } else if (language === "ruby") {
-    return `puts 'Hello, World!'`
+    return `puts 'Hello, World!'`;
   } else if (language === "go") {
     return `package main
 import "fmt"
 
 func main() {
     fmt.Println("Hello, World!")
-}`
+}`;
   } else if (language === "php") {
     return `<?php
 echo "Hello, World!";
-?>`
+?>`;
   } else if (language === "c#") {
     return `using System;
 
@@ -56,11 +56,11 @@ class HelloWorld {
     static void Main() {
         Console.WriteLine("Hello, World!");
     }
-}`
+}`;
   } else if (language === "typescript") {
-    return `console.log('Hello, World!');`
+    return `console.log('Hello, World!');`;
   } else {
-    return `language not supported`
+    return `language not supported`;
   }
 }
 
@@ -358,7 +358,7 @@ exports.runCode = async (req, res) => {
           source_code: code,
           language_id: languageId,
         }),
-      }
+      },
     );
 
     const result = await response.json();
@@ -375,4 +375,100 @@ exports.runCode = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.toString() });
   }
+};
+
+// ----admin route-----
+
+exports.getAllUsersAdmin = async (req, res) => {
+  try {
+    const users = await userModel.find().sort({ date: -1 });
+
+    res.json({ success: true, users });
+  } catch (err) {
+    res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
+exports.getAllProjectsAdmin = async (req, res) => {
+  try {
+    const projects = await projectModel.find().sort({ date: -1 });
+
+    res.json({ success: true, projects });
+  } catch (err) {
+    res.status(500).json({ success: false, msg: err.message });
+  }
+};
+exports.getAnalytics = async (req, res) => {
+  try {
+    const data = await projectModel.aggregate([
+      {
+        $group: {
+          _id: "$projectLanguage",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
+exports.deleteUserAdmin = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    await userModel.findByIdAndDelete(userId);
+    await projectModel.deleteMany({ createdBy: userId });
+
+    res.json({ success: true, msg: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
+exports.getAdminStats = async (req, res) => {
+  try {
+    // ✅ Count total users
+    const totalUsers = await userModel.countDocuments();
+
+    // ✅ Count total projects
+    const totalProjects = await projectModel.countDocuments();
+
+    // ✅ Get latest 5 users
+    const latestUsers = await userModel.find().sort({ _id: -1 }).limit(5);
+
+    // ✅ Get latest 5 projects
+    const latestProjects = await projectModel.find().sort({ _id: -1 }).limit(5);
+
+    // ✅ Final response (frontend friendly)
+    res.json({
+      success: true,
+      stats: {
+        totalUsers,
+        totalProjects,
+      },
+      latestUsers,
+      latestProjects,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      msg: err.message,
+    });
+  }
+};
+
+exports.adminLoginSimple = (req, res) => {
+  const { email, password } = req.body;
+
+  if (
+    email === process.env.ADMIN_EMAIL &&
+    password === process.env.ADMIN_PASSWORD
+  ) {
+    return res.json({ success: true });
+  }
+
+  return res.status(401).json({ success: false });
 };

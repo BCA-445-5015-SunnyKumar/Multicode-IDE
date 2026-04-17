@@ -1,5 +1,5 @@
 var express = require('express');
-const { signup ,login, createProject, saveProject,getProjects,getProject,deleteProject, editProject, runCode} = require('../controllers/userController');
+const { adminLoginSimple ,signup ,login, createProject, saveProject,getProjects,getProject,deleteProject, editProject, runCode , getAllProjectsAdmin, deleteUserAdmin, getAllUsersAdmin, getAnalytics ,getAdminStats} = require('../controllers/userController');
 const { create } = require('../models/projectModels');
 var router = express.Router();
 require("dotenv").config();
@@ -18,7 +18,12 @@ router.post('/getProject',getProject)
 router.post('/deleteProject',deleteProject)
 router.post('/editProject',editProject)
 router.post("/runCode", runCode)
-
+router.post("/admin/projects", getAllProjectsAdmin);
+router.post("/admin/users", getAllUsersAdmin);
+router.post("/admin/deleteUser", deleteUserAdmin);
+router.post("/admin/analytics", getAnalytics);
+router.post("/admin/stats", getAdminStats);
+router.post("/admin/login", adminLoginSimple);
 
 
 

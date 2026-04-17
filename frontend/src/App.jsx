@@ -5,11 +5,13 @@ import NoPage from "./pages/NoPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Editor from "./pages/Editor";
-import LandingPage from "./pages/LandingPage";  
+import LandingPage from "./pages/LandingPage";
+import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem("isAuthenticated") === "true"
+    localStorage.getItem("isAuthenticated") === "true",
   );
 
   // keep state in sync (important for refresh)
@@ -26,22 +28,14 @@ const App = () => {
         <Route
           path="/home"
           element={
-            isAuthenticated ? (
-              <Home />
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            isAuthenticated ? <Home /> : <Navigate to="/login" replace />
           }
         />
 
         <Route
           path="/editor/:id"
           element={
-            isAuthenticated ? (
-              <Editor />
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            isAuthenticated ? <Editor /> : <Navigate to="/login" replace />
           }
         />
 
@@ -52,6 +46,8 @@ const App = () => {
 
         <Route path="/signup" element={<SignUp />} />
         <Route path="*" element={<NoPage />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
       </Routes>
     </BrowserRouter>
   );
